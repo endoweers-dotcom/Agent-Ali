@@ -1,0 +1,1980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALI SPECIAL - Autonomous Financial & Tax Investigation Orchestrator</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        sky: {
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                        },
+                        amber: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        },
+                        rose: {
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                        },
+                        indigo: {
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'float': '0 10px 40px -10px rgba(0, 0, 0, 0.08)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .view-section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(10px);
+        }
+        .view-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .drop-zone {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        .drop-zone.dragover {
+            border-color: #0ea5e9;
+            background-color: #f0f9ff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @keyframes subtle-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .ai-thinking {
+            animation: subtle-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen w-screen overflow-hidden flex font-sans antialiased">
+
+    <!-- Sidebar Navigation -->
+    <nav class="w-64 bg-white border-r border-slate-100 flex flex-col justify-between z-20 shadow-soft shrink-0">
+        <div>
+            <!-- Logo Area -->
+            <div class="h-20 flex items-center px-8 border-b border-slate-50">
+                <i class="ph-fill ph-target text-sky-500 text-3xl mr-3"></i>
+                <div>
+                    <h1 class="font-bold tracking-tight text-slate-900 text-lg leading-none">ALI</h1>
+                    <span class="text-[10px] uppercase font-bold tracking-widest text-sky-600">SPECIAL ORCHESTRATOR</span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="px-4 py-6 space-y-1.5">
+                <button onclick="switchTab('overview')" id="nav-overview" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-sky-50 text-sky-600 font-semibold transition-colors">
+                    <i class="ph ph-squares-four text-xl"></i>
+                    <span>Overview</span>
+                </button>
+                <button onclick="switchTab('intake')" id="nav-intake" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                    <i class="ph ph-upload-simple text-xl"></i>
+                    <span>4-Way Data Intake</span>
+                </button>
+                <button onclick="switchTab('investigation')" id="nav-investigation" class="nav-btn w-full flex items-center justify-between px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                    <div class="flex items-center space-x-3">
+                        <i class="ph ph-magnifying-glass text-xl"></i>
+                        <span>Investigation</span>
+                    </div>
+                    <span class="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full" id="finding-count-badge">4</span>
+                </button>
+                <button onclick="switchTab('output')" id="nav-output" class="nav-btn w-full flex items-center justify-between px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                    <div class="flex items-center space-x-3">
+                        <i class="ph ph-file-text text-xl"></i>
+                        <span>Hasil Audit & Pajak</span>
+                    </div>
+                    <span class="bg-emerald-100 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full">OUTPUT</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- System Engine Status & Hidden Tech Specs -->
+        <div class="p-6 space-y-3">
+            <button onclick="openTechCoreModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white p-3 rounded-2xl transition-all shadow-sm text-left flex items-center justify-between group">
+                <div class="flex items-center space-x-2.5">
+                    <i class="ph-fill ph-cpu text-sky-400 text-lg group-hover:rotate-12 transition-transform"></i>
+                    <div>
+                        <span class="text-[10px] font-bold text-sky-400 block uppercase tracking-wider">ALI Agent Controls</span>
+                        <span class="text-xs font-semibold text-slate-100">Rule Engine & Specs</span>
+                    </div>
+                </div>
+                <i class="ph ph-caret-right text-slate-400 group-hover:translate-x-1 transition-transform"></i>
+            </button>
+
+            <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-100">
+                <div class="flex items-center space-x-2 mb-1">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 ai-thinking"></div>
+                    <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Orchestrator Active</span>
+                </div>
+                <p class="text-[10px] text-slate-500 leading-relaxed">State snapshot isolation prevents data loss during dynamic updates.</p>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col relative h-full overflow-hidden">
+        
+        <!-- Top Header -->
+        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-8 z-10 sticky top-0">
+            <div class="flex items-center text-sm font-medium text-slate-500">
+                <span id="breadcrumb-project" class="font-semibold text-slate-700">Audit Q3 2026 (Finance & Tax)</span>
+                <i class="ph ph-caret-right mx-2 text-slate-300"></i>
+                <span id="breadcrumb-current" class="text-slate-900 font-bold">Executive Overview</span>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <!-- Trigger Autonomous Orchestration Run -->
+                <button onclick="triggerAutonomousPipelineRun()" class="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 shadow-sm">
+                    <i class="ph-fill ph-play-circle text-base"></i>
+                    <span>Run Autonomous Pipeline</span>
+                </button>
+
+                <button id="btn-package" onclick="switchTab('output')" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 shadow-sm">
+                    <i class="ph ph-package text-base text-sky-400"></i>
+                    <span>Lihat Hasil Audit (.ZIP)</span>
+                </button>
+
+                <button onclick="toggleAskAli()" class="bg-slate-900 hover:bg-slate-800 text-white p-3 rounded-xl transition-transform hover:scale-105 shadow-sm flex items-center space-x-2">
+                    <i class="ph-fill ph-sparkle text-sky-400 text-lg"></i>
+                    <span class="text-xs font-semibold">Ask ALI</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Content Container (Scrollable) -->
+        <div class="flex-1 overflow-y-auto p-8 relative" id="main-scroll-area">
+            
+            <!-- VIEW: OVERVIEW -->
+            <div id="view-overview" class="view-section active max-w-6xl mx-auto space-y-6">
+                <!-- Summary Metrics -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <div class="bg-white rounded-2xl p-6 shadow-soft border border-slate-100">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Matching Precision</span>
+                            <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl"><i class="ph ph-check-circle text-xl"></i></div>
+                        </div>
+                        <h3 class="text-3xl font-bold text-slate-900" id="dash-precision">96.4%</h3>
+                        <p class="text-xs text-slate-500 mt-1">Bank vs GL vs Tax e-Faktur</p>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-soft border border-slate-100">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Rows Ingested</span>
+                            <div class="p-2 bg-sky-50 text-sky-600 rounded-xl"><i class="ph ph-files text-xl"></i></div>
+                        </div>
+                        <h3 class="text-3xl font-bold text-slate-900" id="dash-rows-count">12,450</h3>
+                        <p class="text-xs text-slate-500 mt-1">Across Active Data Sources</p>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-soft border border-slate-100">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Anomalies</span>
+                            <div class="p-2 bg-amber-50 text-amber-600 rounded-xl"><i class="ph ph-warning text-xl"></i></div>
+                        </div>
+                        <h3 class="text-3xl font-bold text-amber-600" id="dash-finding-count">4</h3>
+                        <p class="text-xs text-slate-500 mt-1">Acct & Tax Findings Needing Review</p>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-soft border border-slate-100">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tax Risk Exposure</span>
+                            <div class="p-2 bg-rose-50 text-rose-600 rounded-xl"><i class="ph ph-scales text-xl"></i></div>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-900" id="dash-tax-exposure">Rp 38.9M</h3>
+                        <p class="text-xs text-rose-500 font-medium mt-1">Potential PPh/PPN Discrepancy</p>
+                    </div>
+                </div>
+
+                <!-- Chart & Autonomous Log -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Main Chart -->
+                    <div class="bg-white rounded-2xl p-6 shadow-soft border border-slate-100 lg:col-span-2 flex flex-col">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-900">Reconciliation & Tax Compliance Breakdown</h3>
+                                <p class="text-xs text-slate-400" id="chart-subtext">Autonomous classification of active transactions</p>
+                            </div>
+                            <span class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full flex items-center space-x-1">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 ai-thinking"></span>
+                                <span>Live Agent Matrix</span>
+                            </span>
+                        </div>
+                        <div class="flex-1 flex items-center justify-center relative min-h-[280px]">
+                            <canvas id="reconChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Audit Trail Log -->
+                    <div class="bg-white rounded-2xl p-6 shadow-soft border border-slate-100 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-base font-bold text-slate-900">Autonomous Execution Log</h3>
+                                <span class="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded">REALTIME</span>
+                            </div>
+                            <div class="space-y-4 max-h-[300px] overflow-y-auto pr-1" id="orchestration-log-container">
+                                <!-- Log Items Dynamically Appended -->
+                            </div>
+                        </div>
+                        <button onclick="switchTab('investigation')" class="w-full mt-6 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-3 rounded-xl transition-colors text-center">
+                            Open Investigation Center
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: DATA INTAKE -->
+            <div id="view-intake" class="view-section max-w-5xl mx-auto space-y-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 p-6 rounded-3xl text-white shadow-float">
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-sky-500/20 text-sky-300 border border-sky-400/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Zero-Prep Pipeline Engine</span>
+                            <span class="text-xs text-slate-400">• Dynamic Rollback & Quarantine Protected</span>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-white">4-Way Ingestion & Data State Management</h2>
+                        <p class="text-slate-300 text-xs">Autonomous Orchestration normalizes multi-source accounting schemas while preserving immutable raw snapshots.</p>
+                    </div>
+
+                    <div class="flex items-center space-x-2 shrink-0">
+                        <button onclick="openTechCoreModal()" class="bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs font-semibold px-4 py-2.5 rounded-xl backdrop-blur-md transition-colors flex items-center space-x-2">
+                            <i class="ph-fill ph-gear text-sky-400"></i>
+                            <span>Agent Parameters</span>
+                        </button>
+                        <button onclick="confirmMasterReset()" class="bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/30 text-rose-200 text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors flex items-center space-x-2">
+                            <i class="ph ph-arrow-counter-clockwise"></i>
+                            <span>Reset Entire Workspace</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4 Ingestion Methods Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Method 1: Local File -->
+                    <div class="bg-white p-5 rounded-2xl shadow-soft border border-slate-100 flex flex-col justify-between hover:border-sky-500 transition-all group">
+                        <div>
+                            <div class="w-12 h-12 bg-sky-50 text-sky-600 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-file-arrow-up"></i>
+                            </div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Method 1</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-1">Direct File Upload</h4>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Drag & drop raw CSV, XLSX, PDF e-Faktur, or JSON directly.</p>
+                        </div>
+                        <button onclick="scrollToDropzone()" class="mt-4 w-full bg-slate-50 hover:bg-sky-50 text-slate-700 hover:text-sky-600 text-xs font-semibold py-2.5 rounded-xl border border-slate-200 transition-colors">
+                            Drop Files Below
+                        </button>
+                    </div>
+
+                    <!-- Method 2: Google Drive Sync -->
+                    <div class="bg-white p-5 rounded-2xl shadow-soft border border-slate-100 flex flex-col justify-between hover:border-sky-500 transition-all group">
+                        <div>
+                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-google-logo"></i>
+                            </div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-600">Method 2</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-1">Google Drive Sync</h4>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Sync shared client Drive folders or live Google Sheets seamlessly.</p>
+                        </div>
+                        <button onclick="openIntegrationModal('gdrive')" class="mt-4 w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold py-2.5 rounded-xl transition-colors">
+                            Connect Drive
+                        </button>
+                    </div>
+
+                    <!-- Method 3: Gmail Automated Sync -->
+                    <div class="bg-white p-5 rounded-2xl shadow-soft border border-slate-100 flex flex-col justify-between hover:border-sky-500 transition-all group">
+                        <div>
+                            <div class="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-envelope-simple"></i>
+                            </div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-red-500">Method 3</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-1">Gmail Extractor</h4>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Auto-extract bank statements, vendor e-Faktur & PDF receipts from inbox.</p>
+                        </div>
+                        <button onclick="openIntegrationModal('gmail')" class="mt-4 w-full bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold py-2.5 rounded-xl transition-colors">
+                            Setup Inbox Sync
+                        </button>
+                    </div>
+
+                    <!-- Method 4: Direct API / URL -->
+                    <div class="bg-white p-5 rounded-2xl shadow-soft border border-slate-100 flex flex-col justify-between hover:border-sky-500 transition-all group">
+                        <div>
+                            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                                <i class="ph-fill ph-globe"></i>
+                            </div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Method 4</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-1">Direct API Stream</h4>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Fetch cloud storage streams (AWS S3, Azure Blob, or ERP Webhooks).</p>
+                        </div>
+                        <button onclick="openIntegrationModal('url')" class="mt-4 w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold py-2.5 rounded-xl transition-colors">
+                            Configure URL Stream
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Interactive File Dropzone -->
+                <div id="file-dropzone" class="drop-zone bg-white rounded-3xl p-10 flex flex-col items-center justify-center cursor-pointer shadow-soft group relative overflow-hidden">
+                    <input type="file" id="real-file-input" class="hidden" onchange="handleFileSelect(event)">
+                    <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-sky-50 transition-all duration-300">
+                        <i class="ph ph-upload-simple text-3xl text-slate-400 group-hover:text-sky-500"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-1">Drag & Drop Files Here or Click to Browse</h3>
+                    <p class="text-xs text-slate-400 text-center max-w-md">Supports XLSX, CSV, PDF e-Faktur, JSON. Files are automatically cryptographically hashed (SHA-256) and parsed by the Ingestion Agent.</p>
+                    <div class="mt-4 flex items-center space-x-2 text-[10px] text-emerald-600 font-bold bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-100">
+                        <i class="ph-fill ph-shield-check text-sm"></i>
+                        <span>Zero-Prep Quarantine Isolation Active</span>
+                    </div>
+                </div>
+
+                <!-- Active Source Library & Quarantine Inspector -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-soft border border-slate-100 space-y-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h4 class="text-sm font-bold text-slate-900">Immutable Source Library</h4>
+                                    <span class="bg-sky-100 text-sky-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full">Atomic Snapshots</span>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-0.5">Purge or replace source files without disrupting verified state</p>
+                            </div>
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full" id="active-sources-badge">4 Sources Active</span>
+                        </div>
+                        
+                        <div class="space-y-3" id="source-library-list">
+                            <!-- Dynamic Source Items Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Quarantine Zone Panel -->
+                    <div class="bg-white rounded-2xl p-6 shadow-soft border border-slate-100 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="flex items-center space-x-2">
+                                    <div class="p-1.5 bg-amber-100 text-amber-700 rounded-lg">
+                                        <i class="ph-fill ph-warning-octagon text-lg"></i>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-slate-900">Quarantine Zone</h4>
+                                </div>
+                                <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full" id="quarantine-count-badge">2 Rows Isolated</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-4">Corrupted or unparseable raw rows isolated by the Ingestion Agent without halting the pipeline.</p>
+                            
+                            <div class="space-y-2.5" id="quarantine-items-list">
+                                <!-- Dynamic Quarantine Rows -->
+                            </div>
+                        </div>
+
+                        <button onclick="clearQuarantineZone()" class="mt-4 w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 rounded-xl transition-colors">
+                            Purge Quarantine Log
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: INVESTIGATION -->
+            <div id="view-investigation" class="view-section max-w-6xl mx-auto space-y-6">
+                <!-- Undo Toast Bar -->
+                <div id="action-undo-bar" class="hidden bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-float flex items-center justify-between border border-slate-800 animate-fade-in">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-2 h-2 rounded-full bg-emerald-400 ai-thinking"></div>
+                        <span class="text-xs font-medium text-slate-200" id="undo-bar-text">Adjustment entry posted to ledger.</span>
+                    </div>
+                    <button onclick="undoLastAction()" class="text-xs font-bold text-sky-400 hover:text-sky-300 underline underline-offset-4 flex items-center space-x-1">
+                        <i class="ph ph-arrow-u-up-left text-sm"></i>
+                        <span>Batalkan Tindakan (Undo)</span>
+                    </button>
+                </div>
+                
+                <!-- Investigation Header & Filter Bar -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-2 border-b border-slate-200">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">Autonomous Findings Center</span>
+                            <span class="text-xs text-slate-400">| Complete Accounting & Tax Diagnostics</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-900">Detailed Investigation Audit Matrix</h2>
+                        <p class="text-slate-500 text-xs mt-0.5">ALI cross-examines data across Bank Statements, General Ledger, PPN e-Faktur, and PPh Withholding slips.</p>
+                    </div>
+
+                    <!-- Category Filter Tabs -->
+                    <div class="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-sm text-xs font-semibold">
+                        <button onclick="filterFindings('all')" id="filter-all" class="filter-btn px-3 py-1.5 rounded-lg bg-slate-900 text-white transition-colors">All (<span id="count-all">4</span>)</button>
+                        <button onclick="filterFindings('acct')" id="filter-acct" class="filter-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-colors">Accounting (<span id="count-acct">2</span>)</button>
+                        <button onclick="filterFindings('tax')" id="filter-tax" class="filter-btn px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-colors">Tax Risk (<span id="count-tax">2</span>)</button>
+                    </div>
+                </div>
+
+                <!-- Dynamic Anomaly Cards Container -->
+                <div class="space-y-6" id="findings-container">
+                    <!-- Finding Cards Injected Dynamically by JS Engine -->
+                </div>
+
+                <!-- Zero State Findings Box -->
+                <div id="zero-state-findings" class="hidden bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-soft space-y-4">
+                    <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl">
+                        <i class="ph-fill ph-check-circle"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900">Semua Anomali Telah Diselesaikan!</h3>
+                        <p class="text-xs text-slate-500 max-w-md mx-auto mt-1">Seluruh jurnal penyesuaian dan kewajiban perpajakan telah terekonsiliasi 100%. Anda sekarang dapat mengunduh paket audit lengkap.</p>
+                    </div>
+                    <button onclick="switchTab('output')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-xs shadow-md transition-all">
+                        Lihat & Unduh Hasil Audit Lengkap (.ZIP)
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW: AUDIT OUTPUT & TAX RECONCILIATION DELIVERABLES -->
+            <div id="view-output" class="view-section max-w-6xl mx-auto space-y-6">
+                <!-- Deliverable Header Banner -->
+                <div class="bg-slate-900 text-white rounded-3xl p-7 shadow-float relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border border-slate-800">
+                    <div class="space-y-2 z-10">
+                        <div class="flex items-center space-x-3">
+                            <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider flex items-center">
+                                <i class="ph-fill ph-seal-check mr-1 text-sm"></i> Official Audit Output Package
+                            </span>
+                            <span class="text-slate-400 text-xs font-mono">HASH: 0x9F82..A41B</span>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-white">Hasil Rekonsiliasi Pajak & Jurnal Penyesuaian Audit</h2>
+                        <p class="text-slate-300 text-xs max-w-2xl leading-relaxed">
+                            Laporan keluaran resmi dari Orkestrator Agen Otonom ALI. Paket ini berisi ringkasan eksekutif, jurnal koreksi akuntansi (AJE), rekonsiliasi PPh 23, serta SPT Masa PPN yang disesuaikan dengan aturan UU HPP & PMK 141.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-2.5 z-10 shrink-0 w-full md:w-auto">
+                        <button onclick="exportAuditData('csv')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-2 shadow-sm">
+                            <i class="ph-bold ph-download-simple text-base"></i>
+                            <span>Export ERP Jurnal (CSV)</span>
+                        </button>
+                        <button onclick="exportAuditData('xml')" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-2 shadow-sm">
+                            <i class="ph-bold ph-file-code text-base"></i>
+                            <span>e-Faktur & e-Bupot XML</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Output Sub-Navigation Tabs -->
+                <div class="flex items-center bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm text-xs font-semibold space-x-1">
+                    <button onclick="switchOutputSubTab('summary')" id="outsub-summary" class="outsub-btn flex-1 py-2.5 rounded-xl bg-slate-900 text-white transition-colors text-center flex items-center justify-center space-x-2">
+                        <i class="ph-fill ph-chart-line-up text-base"></i>
+                        <span>Executive Summary & Opinion</span>
+                    </button>
+                    <button onclick="switchOutputSubTab('aje')" id="outsub-aje" class="outsub-btn flex-1 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition-colors text-center flex items-center justify-center space-x-2">
+                        <i class="ph-fill ph-notebook text-base"></i>
+                        <span>Jurnal Penyesuaian (AJE)</span>
+                    </button>
+                    <button onclick="switchOutputSubTab('pph')" id="outsub-pph" class="outsub-btn flex-1 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition-colors text-center flex items-center justify-center space-x-2">
+                        <i class="ph-fill ph-receipt text-base"></i>
+                        <span>Rekonsiliasi PPh 23</span>
+                    </button>
+                    <button onclick="switchOutputSubTab('ppn')" id="outsub-ppn" class="outsub-btn flex-1 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 transition-colors text-center flex items-center justify-center space-x-2">
+                        <i class="ph-fill ph-percent text-base"></i>
+                        <span>Rekonsiliasi PPN e-Faktur</span>
+                    </button>
+                </div>
+
+                <!-- SUB-VIEW 1: EXECUTIVE SUMMARY & CERTIFICATE -->
+                <div id="outsub-view-summary" class="outsub-content space-y-6">
+                    <!-- ALI Compliance Opinion Seal Card -->
+                    <div class="bg-white rounded-3xl p-6 shadow-soft border border-slate-200 space-y-6">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-100">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-3xl">
+                                    <i class="ph-fill ph-shield-check"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center space-x-2">
+                                        <h3 class="font-extrabold text-slate-900 text-lg">ALI Autonomous Agent Compliance Certificate</h3>
+                                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">AUDIT VERIFIED</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500">Standar Pengujian: PSAK / IFRS & Peraturan Perpajakan UU HPP No. 7 Tahun 2021</p>
+                                </div>
+                            </div>
+
+                            <div class="text-right">
+                                <span class="text-[10px] text-slate-400 block font-mono">TIMESTAMP SEAL</span>
+                                <span class="text-xs font-bold text-slate-800 font-mono" id="certificate-timestamp">2026-08-29 21:00:00 WIB</span>
+                            </div>
+                        </div>
+
+                        <!-- Highlights Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Status Rekonsiliasi Ledger</span>
+                                <p class="text-xl font-extrabold text-emerald-600 flex items-center" id="summary-recon-status">
+                                    <i class="ph-fill ph-check-circle mr-1.5"></i> 100% Terekonsiliasi
+                                </p>
+                                <p class="text-[11px] text-slate-500 mt-1">4 dari 4 anomali telah memiliki jurnal penyesuaian yang disetujui.</p>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Jurnal Koreksi (AJE)</span>
+                                <p class="text-xl font-extrabold text-slate-900" id="summary-aje-total">Rp 187,800,000</p>
+                                <p class="text-[11px] text-slate-500 mt-1">Total nilai transaksi penyesuaian debet & kredit.</p>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Mitigasi Risiko Pajak Terikat</span>
+                                <p class="text-xl font-extrabold text-sky-600" id="summary-tax-mitigated">Rp 8,380,000</p>
+                                <p class="text-[11px] text-slate-500 mt-1">Potensi sanksi bunga & denda keterlambatan yang berhasil dicegah.</p>
+                            </div>
+                        </div>
+
+                        <!-- Statement Text -->
+                        <div class="p-5 rounded-2xl bg-sky-50/50 border border-sky-100 text-xs text-slate-700 space-y-2 leading-relaxed">
+                            <h4 class="font-bold text-sky-900 flex items-center">
+                                <i class="ph-fill ph-sparkle mr-1.5 text-base text-sky-600"></i> Opini & Ringkasan Hasil Pemeriksaan Agen Otonom:
+                            </h4>
+                            <p>
+                                Berdasarkan pemindaian silang 4-Way Data Intake (Rekening Koran BCA, General Ledger Q3, e-Faktur DJP Masa Agustus 2026, dan JSON Potong PPh 23), Orkestrator ALI mengonfirmasi bahwa seluruh perbedaan material telah diidentifikasi dan diberikan usulan jurnal koreksi otomatis.
+                            </p>
+                            <p class="text-[11px] text-slate-500">
+                                *Catatan Auditor: Semua berkas keluaran di bawah ini telah diverifikasi cryptographic hash dan dapat langsung diimpor ke sistem ERP (SAP, Jurnal, Xero) maupun aplikasi e-Faktur / e-Bupot DJP.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-VIEW 2: JURNAL PENYESUAIAN (AJE) -->
+                <div id="outsub-view-aje" class="outsub-content hidden space-y-4">
+                    <div class="bg-white rounded-3xl p-6 shadow-soft border border-slate-200">
+                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base">Proposed Adjustment Journal Entries (AJE Matrix)</h3>
+                                <p class="text-xs text-slate-400">Jurnal penyesuaian yang siap diunggah ke ERP Perusahaan</p>
+                            </div>
+                            <button onclick="copyToClipboard('aje-table')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg border border-slate-200 transition-colors flex items-center space-x-1">
+                                <i class="ph ph-copy"></i>
+                                <span>Salin Tabel CSV</span>
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs" id="aje-table">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-extrabold text-[10px] tracking-wider">
+                                        <th class="p-3">Tanggal</th>
+                                        <th class="p-3">Ref Anomali</th>
+                                        <th class="p-3">Kode Akun</th>
+                                        <th class="p-3">Nama Akun Ledger</th>
+                                        <th class="p-3 text-right">Debet (Rp)</th>
+                                        <th class="p-3 text-right">Kredit (Rp)</th>
+                                        <th class="p-3 text-center">Status Sign-off</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-slate-700 font-medium" id="aje-table-body">
+                                    <!-- Dynamic Rows Generated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-VIEW 3: REKONSILIASI PPh 23 -->
+                <div id="outsub-view-pph" class="outsub-content hidden space-y-4">
+                    <div class="bg-white rounded-3xl p-6 shadow-soft border border-slate-200">
+                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base">Rekonsiliasi Pemotongan PPh 23 & Draft e-Bupot Unifikas</h3>
+                                <p class="text-xs text-slate-400">Kewajiban potong/pungut jasa berdasarkan PMK 141/PMK.03/2015</p>
+                            </div>
+                            <span class="bg-sky-50 text-sky-700 text-xs font-bold px-3 py-1 rounded-full border border-sky-200">Tarif Standar: 2.0%</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-extrabold text-[10px] tracking-wider">
+                                        <th class="p-3">Nama Vendor / Rekanan</th>
+                                        <th class="p-3">Ref Transaksi</th>
+                                        <th class="p-3">Jenis Jasa (PMK 141)</th>
+                                        <th class="p-3 text-right">DPP (Rp)</th>
+                                        <th class="p-3 text-right">PPh 23 Terutang (2%)</th>
+                                        <th class="p-3 text-center">Status e-Bupot DJP</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-slate-700 font-medium" id="pph-table-body">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-VIEW 4: REKONSILIASI PPN -->
+                <div id="outsub-view-ppn" class="outsub-content hidden space-y-4">
+                    <div class="bg-white rounded-3xl p-6 shadow-soft border border-slate-200">
+                        <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base">Rekonsiliasi PPN Masukan (GL Booked vs DJP e-Faktur)</h3>
+                                <p class="text-xs text-slate-400">Deteksi over-claim PPN & usulan Pembetulan SPT Masa PPN</p>
+                            </div>
+                            <span class="bg-amber-50 text-amber-700 text-xs font-bold px-3 py-1 rounded-full border border-amber-200">Tarif PPN: 11%</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase font-extrabold text-[10px] tracking-wider">
+                                        <th class="p-3">Parameter Rekonsiliasi</th>
+                                        <th class="p-3 text-right">Tercatat di GL (Rp)</th>
+                                        <th class="p-3 text-right">Database DJP e-Faktur (Rp)</th>
+                                        <th class="p-3 text-right">Selisih Variance (Rp)</th>
+                                        <th class="p-3 text-center">Rekomendasi Tindakan Tax</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-slate-700 font-medium" id="ppn-table-body">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Slide-over AI Agent Panel: Ask ALI -->
+    <aside id="ask-ali-panel" class="fixed top-0 right-0 h-full w-96 bg-white shadow-2xl border-l border-slate-100 transform translate-x-full transition-transform duration-300 z-40 flex flex-col justify-between">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center text-lg border border-sky-400/30">
+                    <i class="ph-fill ph-sparkle"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm">Ask ALI Agent</h3>
+                    <p class="text-[10px] text-sky-300">Contextual Audit Assistant</p>
+                </div>
+            </div>
+            <button onclick="closeAllPanels()" class="text-slate-400 hover:text-white transition-colors">
+                <i class="ph ph-x text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Chat History -->
+        <div class="p-6 overflow-y-auto flex-1 space-y-4 text-xs" id="chat-messages">
+            <div class="flex items-start space-x-3">
+                <div class="w-7 h-7 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 shrink-0 mt-0.5">
+                    <i class="ph-fill ph-robot"></i>
+                </div>
+                <div class="bg-slate-100 p-3.5 rounded-2xl rounded-tl-none text-slate-800 leading-relaxed">
+                    Halo! Saya agen otonom ALI. Saya telah memindai data transaksi aktif. Ada pertanyaan tentang estimasi eksposur PPh 23 atau perbedaan PPN Masukan?
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Action Suggestion Chips -->
+        <div class="px-6 py-2 border-t border-slate-50 bg-slate-50/50 flex space-x-2 overflow-x-auto">
+            <button onclick="sendQuickPrompt('Jelaskan aturan PPh 23 untuk transaksi BCA #142')" class="text-[10px] font-semibold bg-white border border-slate-200 text-slate-600 hover:text-sky-600 hover:border-sky-300 px-2.5 py-1 rounded-full whitespace-nowrap transition-colors">
+                PPh 23 Ref #092
+            </button>
+            <button onclick="sendQuickPrompt('Mengapa ada perbedaan PPN Masukan?')" class="text-[10px] font-semibold bg-white border border-slate-200 text-slate-600 hover:text-sky-600 hover:border-sky-300 px-2.5 py-1 rounded-full whitespace-nowrap transition-colors">
+                Selisih PPN
+            </button>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="p-4 border-t border-slate-100 bg-white flex items-center space-x-2">
+            <input type="text" id="chat-input" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Ask ALI anything about your audit..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-sky-500 focus:bg-white transition-all">
+            <button onclick="sendChatMessage()" class="bg-sky-600 hover:bg-sky-700 text-white p-2.5 rounded-xl transition-colors shrink-0">
+                <i class="ph-bold ph-paper-plane-right text-base"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Overlay backdrop -->
+    <div id="overlay" onclick="closeAllPanels()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-30 hidden opacity-0 transition-opacity duration-300"></div>
+
+    <!-- Agent Pipeline Execution Modal -->
+    <div id="pipeline-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="bg-slate-950 text-slate-100 rounded-3xl p-7 max-w-xl w-full mx-4 shadow-float border border-slate-800 transform scale-95 opacity-0 transition-all duration-300 flex flex-col" id="pipeline-modal-box">
+            <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-xl border border-sky-400/30">
+                        <i class="ph-fill ph-gear-six ai-thinking"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-base">Autonomous Pipeline Orchestration</h3>
+                        <p class="text-xs text-slate-400">Executing Multi-Agent Audit Protocol</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="py-6 space-y-4 text-xs">
+                <!-- Agent Progress Steps -->
+                <div class="space-y-3" id="pipeline-steps-container">
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800" id="step-agent-1">
+                        <div class="flex items-center space-x-3">
+                            <i class="ph-fill ph-file-search text-slate-500 text-lg" id="step-icon-1"></i>
+                            <div>
+                                <p class="font-bold text-slate-300">1. Ingestion & Isolation Agent</p>
+                                <p class="text-[10px] text-slate-500" id="step-sub-1">Normalizing schemas & checking quarantine</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400" id="step-status-1">Waiting</span>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800" id="step-agent-2">
+                        <div class="flex items-center space-x-3">
+                            <i class="ph-fill ph-arrows-merge text-slate-500 text-lg" id="step-icon-2"></i>
+                            <div>
+                                <p class="font-bold text-slate-300">2. Fuzzy Reconciliation Agent</p>
+                                <p class="text-[10px] text-slate-500" id="step-sub-2">Matching GL vs Bank within tolerance window</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400" id="step-status-2">Waiting</span>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800" id="step-agent-3">
+                        <div class="flex items-center space-x-3">
+                            <i class="ph-fill ph-scales text-slate-500 text-lg" id="step-icon-3"></i>
+                            <div>
+                                <p class="font-bold text-slate-300">3. Tax Matrix & UU HPP Agent</p>
+                                <p class="text-[10px] text-slate-500" id="step-sub-3">Calculating PPh 23 rates & PPN e-Faktur DPP</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400" id="step-status-3">Waiting</span>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800" id="step-agent-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="ph-fill ph-check-square-offset text-slate-500 text-lg" id="step-icon-4"></i>
+                            <div>
+                                <p class="font-bold text-slate-300">4. Settlement & Journal Proposal Agent</p>
+                                <p class="text-[10px] text-slate-500" id="step-sub-4">Generating proposed adjustment entries</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400" id="step-status-4">Waiting</span>
+                    </div>
+                </div>
+
+                <!-- Live Pipeline Console Output -->
+                <div class="bg-black/80 rounded-xl p-3 font-mono text-[10px] text-emerald-400 h-28 overflow-y-auto space-y-1" id="pipeline-console">
+                    <p class="text-slate-500">// System ready. Click start to run orchestration...</p>
+                </div>
+            </div>
+
+            <div class="pt-2 flex justify-between items-center border-t border-slate-800">
+                <button onclick="closePipelineModal()" id="btn-close-pipeline" class="text-slate-400 hover:text-white text-xs font-semibold">
+                    Close Window
+                </button>
+                <button onclick="executePipelineRunSequence()" id="btn-start-pipeline" class="bg-sky-500 hover:bg-sky-600 text-white font-bold px-5 py-2 rounded-xl text-xs transition-colors shadow-md">
+                    Start Execution
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Core Tech Specs & Agent Rule Config Modal -->
+    <div id="tech-core-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="bg-slate-950 text-slate-100 rounded-3xl p-7 max-w-2xl w-full mx-4 shadow-float border border-slate-800 transform scale-95 opacity-0 transition-all duration-300 max-h-[90vh] flex flex-col" id="tech-modal-box">
+            <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-2xl border border-sky-400/30">
+                        <i class="ph-fill ph-sliders"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-lg">ALI Core Engine Rules & Settings</h3>
+                        <p class="text-xs text-slate-400">Tune Autonomous Agent Parameters & Thresholds</p>
+                    </div>
+                </div>
+                <button onclick="closeTechCoreModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+
+            <div class="py-5 space-y-5 overflow-y-auto flex-1 text-xs">
+                <!-- Config 1: Fuzzy Recon Window -->
+                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-sky-400 text-sm flex items-center">
+                            <i class="ph-fill ph-calendar-blank mr-2 text-base"></i> Recon Date Tolerance Window
+                        </span>
+                        <span class="text-[10px] bg-sky-500/10 text-sky-300 border border-sky-500/20 px-2 py-0.5 rounded font-mono" id="val-fuzzy-window">7 Days</span>
+                    </div>
+                    <p class="text-slate-400 text-[11px]">Controls maximum allowed date discrepancy between Bank Outflow and GL Date during fuzzy matching.</p>
+                    <input type="range" id="input-fuzzy-window" min="1" max="14" value="7" oninput="updateRuleParam('fuzzy', this.value)" class="w-full accent-sky-500 cursor-pointer">
+                </div>
+
+                <!-- Config 2: Default PPh 23 Tax Rate -->
+                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-emerald-400 text-sm flex items-center">
+                            <i class="ph-fill ph-percent mr-2 text-base"></i> Default PPh 23 Withholding Rate
+                        </span>
+                        <span class="text-[10px] bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 px-2 py-0.5 rounded font-mono" id="val-pph-rate">2.0%</span>
+                    </div>
+                    <p class="text-slate-400 text-[11px]">Standard rate applied by Tax Agent on unrecorded service expenditures (PMK 141).</p>
+                    <input type="range" id="input-pph-rate" min="1" max="5" step="0.5" value="2" oninput="updateRuleParam('pph', this.value)" class="w-full accent-emerald-500 cursor-pointer">
+                </div>
+
+                <!-- Config 3: PPN Discrepancy Alert Threshold -->
+                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-amber-400 text-sm flex items-center">
+                            <i class="ph-fill ph-warning-circle mr-2 text-base"></i> PPN Masukan Tolerance Threshold
+                        </span>
+                        <span class="text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/20 px-2 py-0.5 rounded font-mono" id="val-ppn-threshold">Rp 500,000</span>
+                    </div>
+                    <p class="text-slate-400 text-[11px]">Minimum variance between e-Faktur DJP and GL credit that triggers an anomaly flag.</p>
+                    <input type="range" id="input-ppn-threshold" min="100000" max="2000000" step="100000" value="500000" oninput="updateRuleParam('ppn', this.value)" class="w-full accent-amber-500 cursor-pointer">
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800 flex justify-between items-center">
+                <button onclick="resetRulesToDefault()" class="text-xs text-slate-400 hover:text-white underline">
+                    Reset to Default Rules
+                </button>
+                <button onclick="applyRuleParametersAndReevaluate()" class="bg-sky-500 hover:bg-sky-600 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition-colors shadow-md flex items-center space-x-1.5">
+                    <i class="ph-bold ph-arrows-clockwise"></i>
+                    <span>Apply & Re-evaluate Audit Matrix</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Integrations Connector Modal -->
+    <div id="integration-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full mx-4 shadow-float border border-slate-100 transform scale-95 opacity-0 transition-all duration-300" id="modal-content-box">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center space-x-3">
+                    <div id="modal-icon-container" class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-xl">
+                        <i class="ph-fill ph-plug font-bold"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base" id="modal-title">Connect Source Stream</h3>
+                        <p class="text-xs text-slate-400" id="modal-subtitle">Method Setup</p>
+                    </div>
+                </div>
+                <button onclick="closeIntegrationModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i class="ph ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <div id="modal-body" class="space-y-4">
+                <!-- Dynamic Content Injected -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Deep Audit Coordinate Inspection Modal -->
+    <div id="inspect-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-3xl w-full mx-4 shadow-float border border-slate-100 transform scale-95 opacity-0 transition-all duration-300 max-h-[90vh] flex flex-col" id="inspect-modal-box">
+            <div class="flex justify-between items-center pb-4 border-b border-slate-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-xl">
+                        <i class="ph-fill ph-magnifying-glass font-bold"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base" id="inspect-title">Deep Audit Traceability View</h3>
+                        <p class="text-xs text-slate-400" id="inspect-sub">Exact Evidence Coordinates & Algorithm Logs</p>
+                    </div>
+                </div>
+                <button onclick="closeInspectModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+
+            <div class="py-4 space-y-4 overflow-y-auto flex-1 text-xs" id="inspect-body">
+                <!-- Dynamic raw evidence breakdown -->
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex justify-end">
+                <button onclick="closeInspectModal()" class="bg-slate-900 text-white font-bold px-5 py-2 rounded-xl text-xs hover:bg-slate-800 transition-colors">
+                    Close Inspection
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="reset-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full mx-4 shadow-float border border-slate-100 transform scale-95 opacity-0 transition-all duration-300" id="reset-modal-box">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+                        <i class="ph-fill ph-warning-octagon"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base" id="reset-modal-title">Reset Source Data</h3>
+                        <p class="text-xs text-slate-400">Atomic Rollback Guardrail</p>
+                    </div>
+                </div>
+                <button onclick="closeResetModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i class="ph ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs text-slate-600">
+                <p id="reset-modal-body">Apakah Anda yakin? Engine ALI akan mencabut data ini dan melakukan re-indexing ulang secara otomatis.</p>
+                <div class="bg-amber-50 p-3 rounded-xl border border-amber-100 text-amber-800 text-[11px]">
+                    <i class="ph-fill ph-info mr-1"></i> <strong>Live Re-indexing:</strong> Matriks pemeriksaan akan dikalkulasi ulang secara instan.
+                </div>
+            </div>
+
+            <div class="mt-6 flex space-x-3">
+                <button onclick="closeResetModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition-colors">
+                    Batal
+                </button>
+                <button id="btn-confirm-reset-action" class="w-1/2 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs transition-colors shadow-sm">
+                    Ya, Reset Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT STATE & AGENT ORCHESTRATION ENGINE -->
+    <script>
+        // Global Application & Agent State
+        const state = {
+            activeTab: 'overview',
+            rules: {
+                fuzzyWindow: 7, // days
+                pphRate: 2.0,   // %
+                ppnThreshold: 500000 // IDR
+            },
+            sources: [
+                { id: 'source-1', name: 'Bank_BCA_August_2026.xlsx', method: 'Method 1 (Upload)', type: 'Bank Statement', size: '2.4 MB', rows: 1420, hash: '8f3a..e91', status: 'Parsed' },
+                { id: 'source-2', name: 'General_Ledger_Q3_Final.pdf', method: 'Method 2 (Drive)', type: 'Accounting GL', size: '4.8 MB', rows: 8900, hash: '4b1c..33d', status: 'Parsed' },
+                { id: 'source-3', name: 'eFaktur_PPN_Masa_Aug2026.csv', method: 'Method 3 (Gmail)', type: 'e-Faktur DJP', size: '1.2 MB', rows: 1800, hash: 'd912..0aa', status: 'Parsed' },
+                { id: 'source-4', name: 'Vendor_Tax_Slip_PPh23.json', method: 'Method 4 (API Stream)', type: 'Withholding Slips', size: 'Real-time', rows: 330, hash: 'STREAM ACTIVE', status: 'Parsed' }
+            ],
+            quarantine: [
+                { id: 'q-1', source: 'Bank_BCA_August_2026.xlsx', rowNum: 88, reason: 'Corrupted Currency Symbol (US$ mixed in IDR stream)', rawText: '2026-08-10 | DB | US$ 12,000 | Fee' },
+                { id: 'q-2', source: 'General_Ledger_Q3_Final.pdf', rowNum: 412, reason: 'Unmapped Account Code (9999-TEMP)', rawText: '2026-08-14 | Journal #912 | 9999-TEMP | Rp 4,500,000' }
+            ],
+            findings: [
+                {
+                    id: 'finding-1',
+                    ref: 'ANOM-2026-092',
+                    category: ['acct', 'tax'],
+                    title: 'Unrecorded Bank Outflow with PPh 23 Tax Exposure',
+                    riskLevel: 'High Risk • Acct + Tax',
+                    desc: 'A bank debit transaction of Rp 184,000,000 to vendor PT Mitra Tekno Utama exists in the Bank Statement, but is missing from the General Ledger.',
+                    implication: 'Potential PPh 23 unwithheld liability (2% = Rp 3,680,000) + Sanksi Bunga Pasal 13 KUP.',
+                    exposureValue: 3680000,
+                    sourceTrace: {
+                        s1: 'Bank_BCA_Aug.xlsx (Row #142)',
+                        s2: 'NOT FOUND IN GL',
+                        tax: 'MISSING BUKPOT'
+                    },
+                    recommendation: 'Auto-generate a Suspense Expense Journal Entry (Dr. Expense Rp 184M, Cr. Bank Rp 184M) and create a PPh 23 Tax Accrual Entry.'
+                },
+                {
+                    id: 'finding-2',
+                    ref: 'ANOM-2026-104',
+                    category: ['tax'],
+                    title: 'Input Tax Credit (PPN Masukan) DPP Variance',
+                    riskLevel: 'Medium Risk • Tax PPN',
+                    desc: 'GL records PPN Masukan of Rp 16,500,000 (11% of Rp 150M), but official e-Faktur DJP database shows tax base (DPP) of Rp 135,000,000 with PPN Rp 14,850,000.',
+                    implication: 'Over-claimed PPN Masukan credit of Rp 1,650,000 in SPT Masa PPN.',
+                    exposureValue: 1650000,
+                    sourceTrace: {
+                        s1: 'GL Record: DPP Rp 150M | PPN Rp 16.5M',
+                        s2: 'e-Faktur DJP: DPP Rp 135M | PPN Rp 14.85M',
+                        tax: 'Variance: Rp 1,650,000 (Over-claim)'
+                    },
+                    recommendation: 'Generate Tax Adjustment Entry reducing PPN Masukan account by Rp 1,650,000 and reclassify to Vendor Payable discrepancy.'
+                },
+                {
+                    id: 'finding-3',
+                    ref: 'ANOM-2026-118',
+                    category: ['acct'],
+                    title: 'Exchange Rate Realized Loss Discrepancy',
+                    riskLevel: 'Accounting Variance',
+                    desc: 'Foreign currency payment of USD 10,000 matched Invoice #INV-882, but bank settled at Rp 15,800/USD while GL booked rate was Rp 15,585/USD.',
+                    implication: 'Unrecorded Realized Forex Loss: Rp 2,150,000.',
+                    exposureValue: 2150000,
+                    sourceTrace: {
+                        s1: 'Bank Actual: Rp 158,000,000',
+                        s2: 'GL Booked: Rp 155,850,000',
+                        tax: 'Selisih Kurs Realisasi'
+                    },
+                    recommendation: 'Auto-post Forex Loss entry (Dr. Realized Loss #7120 Rp 2,150,000, Cr. Cash in Bank Rp 2,150,000).'
+                },
+                {
+                    id: 'finding-4',
+                    ref: 'ANOM-2026-140',
+                    category: ['tax'],
+                    title: 'Missing PPh 23 Withholding Slip (Bukti Potong)',
+                    riskLevel: 'High Risk • Tax Compliance',
+                    desc: 'Management Fee expense of Rp 45,000,000 paid to CV Konsultan Perkasa has no associated PPh 23 e-Bupot slip recorded in DJP database.',
+                    implication: 'Unpaid Tax Obligation (2%): Rp 900,000 + Late Filing Fine.',
+                    exposureValue: 900000,
+                    sourceTrace: {
+                        s1: 'GL Account: 6200-Professional Fees',
+                        s2: 'DJP e-Bupot Sync: NOT FILED IN UNIFIED BUPOT',
+                        tax: 'Missing e-Bupot Slip'
+                    },
+                    recommendation: 'Generate e-Bupot draft for DJP API submission and accrue PPh 23 payable of Rp 900,000.'
+                }
+            ],
+            logs: [],
+            lastResolved: null,
+            reconChartInstance: null
+        };
+
+        const tabTitles = {
+            'overview': 'Executive Overview',
+            'intake': '4-Way Zero-Prep Data Intake & State Control',
+            'investigation': 'Detailed Audit Matrix & Investigation',
+            'output': 'Hasil Audit Akuntansi & Rekonsiliasi Pajak Deliverables'
+        };
+
+        // Initialize App on DOM Load
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            renderSourcesList();
+            renderQuarantineList();
+            renderFindingsList();
+            renderOutputDeliverables();
+            appendLog('4 Data Sources Synchronized', 'Bank, GL, e-Faktur, PPh Slips', 'System Core', 'emerald');
+            appendLog('Tax Rules Applied', `PPh 23 Rate (${state.rules.pphRate}%), Fuzzy Window (${state.rules.fuzzyWindow}d)`, 'Logic Layer', 'sky');
+            appendLog('Gatekeeper Locked', `${state.findings.length} anomalies flagged for review`, 'Action Required', 'amber');
+            updateMetricsUI();
+            setupDropzone();
+        });
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-sky-50', 'text-sky-600', 'font-semibold');
+                btn.classList.add('text-slate-500', 'hover:bg-slate-50', 'hover:text-slate-900', 'font-medium');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-500', 'hover:bg-slate-50', 'hover:text-slate-900', 'font-medium');
+                activeBtn.classList.add('bg-sky-50', 'text-sky-600', 'font-semibold');
+            }
+
+            document.querySelectorAll('.view-section').forEach(view => {
+                view.classList.remove('active');
+            });
+
+            setTimeout(() => {
+                const targetView = document.getElementById(`view-${tabId}`);
+                if (targetView) targetView.classList.add('active');
+            }, 50);
+
+            document.getElementById('breadcrumb-current').textContent = tabTitles[tabId];
+            document.getElementById('main-scroll-area').scrollTop = 0;
+            state.activeTab = tabId;
+
+            if (tabId === 'output') {
+                renderOutputDeliverables();
+            }
+        }
+
+        // Sub-Tab Switching inside Audit Output View
+        function switchOutputSubTab(subId) {
+            document.querySelectorAll('.outsub-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-900', 'text-white');
+                btn.classList.add('text-slate-600');
+            });
+            document.getElementById(`outsub-${subId}`).classList.add('bg-slate-900', 'text-white');
+
+            document.querySelectorAll('.outsub-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById(`outsub-view-${subId}`).classList.remove('hidden');
+        }
+
+        // Render Deliverable Output Tables (AJE, PPh 23, PPN)
+        function renderOutputDeliverables() {
+            // Render AJE Table
+            const ajeBody = document.getElementById('aje-table-body');
+            if (ajeBody) {
+                ajeBody.innerHTML = `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-mono text-slate-500">2026-08-15</td>
+                        <td class="p-3 font-bold text-sky-600">ANOM-2026-092</td>
+                        <td class="p-3 font-mono font-bold">6100-EXP</td>
+                        <td class="p-3">Beban Operational Jasa TI (PT Mitra Tekno)</td>
+                        <td class="p-3 text-right font-semibold text-slate-900">184,000,000</td>
+                        <td class="p-3 text-right font-semibold text-slate-400">0</td>
+                        <td class="p-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">AUTO-POSTED</span></td>
+                    </tr>
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-mono text-slate-500">2026-08-15</td>
+                        <td class="p-3 font-bold text-sky-600">ANOM-2026-092</td>
+                        <td class="p-3 font-mono font-bold">1110-BANK</td>
+                        <td class="p-3">Kas di Bank BCA - Rek Giro Outflow</td>
+                        <td class="p-3 text-right font-semibold text-slate-400">0</td>
+                        <td class="p-3 text-right font-semibold text-slate-900">184,000,000</td>
+                        <td class="p-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">AUTO-POSTED</span></td>
+                    </tr>
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-mono text-slate-500">2026-08-18</td>
+                        <td class="p-3 font-bold text-sky-600">ANOM-2026-104</td>
+                        <td class="p-3 font-mono font-bold">2100-AP</td>
+                        <td class="p-3">Utang Usaha Discrepancy Adjustment</td>
+                        <td class="p-3 text-right font-semibold text-slate-900">1,650,000</td>
+                        <td class="p-3 text-right font-semibold text-slate-400">0</td>
+                        <td class="p-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">AUTO-POSTED</span></td>
+                    </tr>
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-mono text-slate-500">2026-08-18</td>
+                        <td class="p-3 font-bold text-sky-600">ANOM-2026-104</td>
+                        <td class="p-3 font-mono font-bold">1180-VATIN</td>
+                        <td class="p-3">PPN Masukan (Over-claim Credit Adjustment)</td>
+                        <td class="p-3 text-right font-semibold text-slate-400">0</td>
+                        <td class="p-3 text-right font-semibold text-slate-900">1,650,000</td>
+                        <td class="p-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">AUTO-POSTED</span></td>
+                    </tr>
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-mono text-slate-500">2026-08-22</td>
+                        <td class="p-3 font-bold text-sky-600">ANOM-2026-118</td>
+                        <td class="p-3 font-mono font-bold">7120-FXLOSS</td>
+                        <td class="p-3">Rugi Selisih Kurs Realisasi Bank Settlement</td>
+                        <td class="p-3 text-right font-semibold text-slate-900">2,150,000</td>
+                        <td class="p-3 text-right font-semibold text-slate-400">0</td>
+                        <td class="p-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">AUTO-POSTED</span></td>
+                    </tr>
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-mono text-slate-500">2026-08-22</td>
+                        <td class="p-3 font-bold text-sky-600">ANOM-2026-118</td>
+                        <td class="p-3 font-mono font-bold">1110-BANK</td>
+                        <td class="p-3">Kas di Bank Valuta Asing (USD)</td>
+                        <td class="p-3 text-right font-semibold text-slate-400">0</td>
+                        <td class="p-3 text-right font-semibold text-slate-900">2,150,000</td>
+                        <td class="p-3 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">AUTO-POSTED</span></td>
+                    </tr>
+                `;
+            }
+
+            // Render PPh 23 Table
+            const pphBody = document.getElementById('pph-table-body');
+            if (pphBody) {
+                pphBody.innerHTML = `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-bold text-slate-800">PT Mitra Tekno Utama</td>
+                        <td class="p-3 font-mono text-sky-600">ANOM-2026-092</td>
+                        <td class="p-3">Jasa Teknik & Sistem Informasi</td>
+                        <td class="p-3 text-right font-semibold">184,000,000</td>
+                        <td class="p-3 text-right font-bold text-rose-600">3,680,000</td>
+                        <td class="p-3 text-center"><span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">DRAFT E-BUPOT</span></td>
+                    </tr>
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-bold text-slate-800">CV Konsultan Perkasa</td>
+                        <td class="p-3 font-mono text-sky-600">ANOM-2026-140</td>
+                        <td class="p-3">Jasa Manajemen Ops</td>
+                        <td class="p-3 text-right font-semibold">45,000,000</td>
+                        <td class="p-3 text-right font-bold text-rose-600">900,000</td>
+                        <td class="p-3 text-center"><span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">DRAFT E-BUPOT</span></td>
+                    </tr>
+                `;
+            }
+
+            // Render PPN Table
+            const ppnBody = document.getElementById('ppn-table-body');
+            if (ppnBody) {
+                ppnBody.innerHTML = `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-bold text-slate-800">Dasar Pengenaan Pajak (DPP) Masa Ags 2026</td>
+                        <td class="p-3 text-right font-semibold">Rp 150,000,000</td>
+                        <td class="p-3 text-right font-semibold">Rp 135,000,000</td>
+                        <td class="p-3 text-right font-bold text-amber-600">Rp (15,000,000)</td>
+                        <td class="p-3 text-center"><span class="bg-sky-100 text-sky-800 text-[10px] font-bold px-2 py-0.5 rounded">Koreksi DPP GL</span></td>
+                    </tr>
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-3 font-bold text-slate-800">PPN Masukan Kredit Pajak (11%)</td>
+                        <td class="p-3 text-right font-semibold">Rp 16,500,000</td>
+                        <td class="p-3 text-right font-semibold">Rp 14,850,000</td>
+                        <td class="p-3 text-right font-bold text-rose-600">Rp 1,650,000</td>
+                        <td class="p-3 text-center"><span class="bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.5 rounded">Pembetulan SPT Masa</span></td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Export Function Simulations
+        function exportAuditData(type) {
+            if (type === 'csv') {
+                alert('Mengunduh file CSV "ALI_Audit_Adjustment_Journals_Q3_2026.csv" (Format kompatibel SAP / Jurnal Online / Xero).');
+            } else if (type === 'xml') {
+                alert('Mengunduh paket "DJP_eFaktur_eBupot_Reconciliation_Aug2026.xml" untuk impor langsung ke portal Coretax / e-Faktur DJP.');
+            }
+        }
+
+        function copyToClipboard(elementId) {
+            alert('Tabel Jurnal Koreksi (AJE) telah disalin ke clipboard!');
+        }
+
+        // Render Active Source Library
+        function renderSourcesList() {
+            const container = document.getElementById('source-library-list');
+            if (!container) return;
+
+            if (state.sources.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                        <i class="ph ph-folder-open text-3xl mb-1 text-slate-300"></i>
+                        <p class="text-xs font-semibold">Semua data sumber telah dikosongkan.</p>
+                        <p class="text-[10px]">Unggah file baru untuk memulai proses audit baru.</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = state.sources.map(s => `
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100 gap-3 group hover:border-slate-300 transition-all" id="${s.id}">
+                        <div class="flex items-center space-x-3">
+                            <i class="ph-fill ph-file-spreadsheet text-emerald-600 text-2xl shrink-0"></i>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <p class="text-xs font-bold text-slate-800">${s.name}</p>
+                                    <span class="text-[9px] bg-slate-200 text-slate-600 px-1.5 py-0.2 rounded font-mono">${s.hash}</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500">${s.method} • ${s.type} • ${s.rows.toLocaleString()} rows</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 self-end sm:self-auto">
+                            <span class="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg text-xs font-bold">${s.status}</span>
+                            <button onclick="confirmDeleteSource('${s.id}')" title="Remove file" class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg border border-transparent hover:border-rose-200 transition-colors">
+                                <i class="ph ph-trash text-base"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('active-sources-badge').textContent = `${state.sources.length} Sources Active`;
+        }
+
+        // Render Quarantine Items
+        function renderQuarantineList() {
+            const container = document.getElementById('quarantine-items-list');
+            if (!container) return;
+
+            if (state.quarantine.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-4">Quarantine zone is clean.</p>`;
+            } else {
+                container.innerHTML = state.quarantine.map(q => `
+                    <div class="p-2.5 rounded-xl bg-amber-50/60 border border-amber-100 text-xs space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-slate-800">${q.source} (Row #${q.rowNum})</span>
+                            <span class="text-[9px] bg-amber-200 text-amber-900 px-1.5 py-0.2 rounded font-bold">ISOLATED</span>
+                        </div>
+                        <p class="text-[10px] text-amber-800 font-medium">${q.reason}</p>
+                        <p class="text-[9px] font-mono text-slate-500 bg-white p-1 rounded border border-slate-100 truncate">${q.rawText}</p>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('quarantine-count-badge').textContent = `${state.quarantine.length} Rows Isolated`;
+        }
+
+        // Render Anomaly Finding Cards Dynamically
+        function renderFindingsList() {
+            const container = document.getElementById('findings-container');
+            const zeroBox = document.getElementById('zero-state-findings');
+            if (!container) return;
+
+            if (state.findings.length === 0) {
+                container.innerHTML = '';
+                zeroBox.classList.remove('hidden');
+                return;
+            } else {
+                zeroBox.classList.add('hidden');
+            }
+
+            container.innerHTML = state.findings.map(f => {
+                const catClasses = f.category.join(' ');
+                return `
+                <div class="finding-card ${catClasses} bg-white rounded-2xl shadow-soft border border-slate-200 overflow-hidden" id="${f.id}">
+                    <div class="border-b border-slate-100 p-4 px-6 flex justify-between items-center bg-slate-50/80">
+                        <div class="flex items-center space-x-3">
+                            <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-lg text-xs font-extrabold uppercase tracking-wider">${f.riskLevel}</span>
+                            <h3 class="text-base font-bold text-slate-900">${f.title}</h3>
+                        </div>
+                        <span class="text-xs font-mono font-bold text-slate-400">REF: ${f.ref}</span>
+                    </div>
+
+                    <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">1. Finding Description</h4>
+                            <p class="text-xs text-slate-700 leading-relaxed font-medium">${f.desc}</p>
+                            <div class="bg-rose-50 rounded-xl p-3 border border-rose-100 text-xs">
+                                <span class="font-bold text-rose-700 block mb-0.5"><i class="ph ph-warning-circle mr-1"></i> Exposure Impact:</span>
+                                <p class="text-rose-600 text-[11px]">${f.implication}</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 bg-slate-50 rounded-xl p-4 border border-slate-100 text-xs">
+                            <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">2. Source Traceability Matrix</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center pb-1.5 border-b border-slate-200">
+                                    <span class="text-slate-500">Source 1:</span>
+                                    <span class="font-mono font-semibold text-slate-800">${f.sourceTrace.s1}</span>
+                                </div>
+                                <div class="flex justify-between items-center pb-1.5 border-b border-slate-200">
+                                    <span class="text-slate-500">Source 2:</span>
+                                    <span class="font-mono font-semibold text-rose-600">${f.sourceTrace.s2}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-500">Tax Matrix:</span>
+                                    <span class="font-semibold text-sky-600">${f.sourceTrace.tax}</span>
+                                </div>
+                            </div>
+                            <button onclick="openInspectModal('${f.ref}')" class="w-full text-center text-xs text-sky-600 hover:text-sky-700 font-bold bg-white py-1.5 rounded-lg border border-sky-100 shadow-sm transition-colors mt-2">
+                                Inspect Raw Coordinates <i class="ph ph-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-sky-50/60 rounded-xl p-4 border border-sky-100 flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-xs font-extrabold text-sky-700 uppercase tracking-wider flex items-center mb-2">
+                                    <i class="ph-fill ph-sparkle mr-1.5 text-base"></i> ALI Autonomous Recommendation
+                                </h4>
+                                <p class="text-xs text-slate-700 leading-relaxed">${f.recommendation}</p>
+                            </div>
+
+                            <div class="space-y-2 mt-4">
+                                <button onclick="resolveFinding('${f.id}', false)" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2.5 rounded-xl text-xs transition-colors shadow-sm flex items-center justify-center">
+                                    <i class="ph ph-check-circle mr-1.5 text-base"></i> Approve Proposed Action
+                                </button>
+                                <button onclick="resolveFinding('${f.id}', true)" class="w-full bg-white hover:bg-slate-50 text-slate-700 font-semibold py-2 rounded-xl text-xs border border-slate-200 transition-colors">
+                                    Manual Adjustment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // Metrics & UI Updates
+        function updateMetricsUI() {
+            const totalFindingCount = state.findings.length;
+            const totalRows = state.sources.reduce((acc, s) => acc + (typeof s.rows === 'number' ? s.rows : 0), 0);
+            
+            // Calculate total tax exposure
+            const totalExposure = state.findings.reduce((acc, f) => acc + f.exposureValue, 0);
+            const exposureFormatted = totalExposure > 0 
+                ? `Rp ${(totalExposure / 1000000).toFixed(1)}M`
+                : 'Rp 0 (Resolved)';
+
+            // Precision calculation
+            const precisionVal = totalFindingCount === 0 ? 100 : (100 - (totalFindingCount * 0.9)).toFixed(1);
+
+            document.getElementById('dash-precision').textContent = `${precisionVal}%`;
+            document.getElementById('dash-rows-count').textContent = totalRows.toLocaleString();
+            document.getElementById('dash-finding-count').textContent = totalFindingCount;
+            document.getElementById('dash-tax-exposure').textContent = exposureFormatted;
+            document.getElementById('finding-count-badge').textContent = totalFindingCount;
+            document.getElementById('count-all').textContent = totalFindingCount;
+
+            const acctCount = state.findings.filter(f => f.category.includes('acct')).length;
+            const taxCount = state.findings.filter(f => f.category.includes('tax')).length;
+            document.getElementById('count-acct').textContent = acctCount;
+            document.getElementById('count-tax').textContent = taxCount;
+
+            if (totalFindingCount === 0) {
+                document.getElementById('finding-count-badge').style.display = 'none';
+                const btnPackage = document.getElementById('btn-package');
+                btnPackage.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-100', 'text-slate-400');
+                btnPackage.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'text-white', 'shadow-md');
+            } else {
+                document.getElementById('finding-count-badge').style.display = 'inline-block';
+            }
+
+            updateChartData();
+        }
+
+        // Append to Orchestration Log
+        function appendLog(title, detail, source, color = 'sky') {
+            const colorMap = {
+                emerald: 'bg-emerald-500',
+                sky: 'bg-sky-500',
+                amber: 'bg-amber-500',
+                rose: 'bg-rose-500'
+            };
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            const logItem = { title, detail, source, color, timeStr };
+            state.logs.unshift(logItem);
+
+            const container = document.getElementById('orchestration-log-container');
+            if (container) {
+                const el = document.createElement('div');
+                el.className = 'flex items-start space-x-3 animate-fade-in';
+                el.innerHTML = `
+                    <div class="w-2.5 h-2.5 mt-1.5 rounded-full ${colorMap[color] || 'bg-sky-500'} shrink-0"></div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-800">${title}</p>
+                        <p class="text-[11px] text-slate-500">${detail}</p>
+                        <span class="text-[10px] text-slate-400">${timeStr} • ${source}</span>
+                    </div>
+                `;
+                container.prepend(el);
+            }
+        }
+
+        // Resolve Anomaly Card Function
+        function resolveFinding(id, isManual) {
+            const index = state.findings.findIndex(f => f.id === id);
+            if (index === -1) return;
+
+            const removed = state.findings.splice(index, 1)[0];
+            state.lastResolved = { item: removed, index };
+
+            renderFindingsList();
+            updateMetricsUI();
+
+            const actionText = isManual ? 'Manual Adjustment Recorded.' : 'ALI Auto-Journal & Tax Accrual Executed.';
+            appendLog(`Resolved: ${removed.ref}`, actionText, 'Auditor Sign-off', 'emerald');
+            showUndoBar(`${removed.ref}: ${actionText}`);
+        }
+
+        function showUndoBar(msg) {
+            const bar = document.getElementById('action-undo-bar');
+            document.getElementById('undo-bar-text').textContent = msg;
+            bar.classList.remove('hidden');
+        }
+
+        function undoLastAction() {
+            if (!state.lastResolved) return;
+
+            state.findings.splice(state.lastResolved.index, 0, state.lastResolved.item);
+            const restoredRef = state.lastResolved.item.ref;
+            state.lastResolved = null;
+
+            renderFindingsList();
+            updateMetricsUI();
+
+            document.getElementById('action-undo-bar').classList.add('hidden');
+            appendLog(`Restored: ${restoredRef}`, 'Previous sign-off undone by user', 'Undo Action', 'amber');
+        }
+
+        // Filter Findings View
+        function filterFindings(category) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-900', 'text-white');
+                btn.classList.add('text-slate-600');
+            });
+            document.getElementById(`filter-${category}`).classList.add('bg-slate-900', 'text-white');
+
+            const cards = document.querySelectorAll('.finding-card');
+            cards.forEach(card => {
+                if (category === 'all' || card.classList.contains(category)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Drag and Drop & File Upload Handler
+        function setupDropzone() {
+            const zone = document.getElementById('file-dropzone');
+            const fileInput = document.getElementById('real-file-input');
+
+            zone.addEventListener('click', () => fileInput.click());
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('dragover');
+            });
+            zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                if (e.dataTransfer.files.length) {
+                    processUploadedFiles(e.dataTransfer.files);
+                }
+            });
+        }
+
+        function handleFileSelect(e) {
+            if (e.target.files.length) {
+                processUploadedFiles(e.target.files);
+            }
+        }
+
+        function processUploadedFiles(fileList) {
+            Array.from(fileList).forEach(file => {
+                const fakeHash = 'sha256-' + Math.random().toString(36).substring(2, 8);
+                const estimatedRows = Math.floor(Math.random() * 2000) + 150;
+                
+                const newSource = {
+                    id: `source-${Date.now()}`,
+                    name: file.name,
+                    method: 'Method 1 (Local Upload)',
+                    type: 'Ingested File',
+                    size: `${(file.size / 1024).toFixed(1)} KB`,
+                    rows: estimatedRows,
+                    hash: fakeHash,
+                    status: 'Parsed'
+                };
+
+                state.sources.unshift(newSource);
+                appendLog(`File Ingested: ${file.name}`, `Ingestion Agent normalized ${estimatedRows} rows`, 'Data Ingestion', 'sky');
+            });
+
+            renderSourcesList();
+            updateMetricsUI();
+        }
+
+        // Delete Source Item
+        function confirmDeleteSource(id) {
+            const index = state.sources.findIndex(s => s.id === id);
+            if (index !== -1) {
+                const removed = state.sources.splice(index, 1)[0];
+                renderSourcesList();
+                updateMetricsUI();
+                appendLog(`Source Purged: ${removed.name}`, 'State snapshot re-indexed', 'Rollback Engine', 'rose');
+            }
+        }
+
+        function confirmMasterReset() {
+            openResetModal();
+            document.getElementById('reset-modal-title').textContent = 'Reset Entire Audit Workspace';
+            document.getElementById('reset-modal-body').textContent = 'PERINGATAN: Tindakan ini akan mengosongkan seluruh data sumber, snapshot, dan matriks temuan.';
+            document.getElementById('btn-confirm-reset-action').onclick = () => {
+                state.sources = [];
+                state.findings = [];
+                state.quarantine = [];
+                renderSourcesList();
+                renderQuarantineList();
+                renderFindingsList();
+                updateMetricsUI();
+                closeResetModal();
+                appendLog('Master Workspace Reset', 'All states purged to zero baseline', 'System Reset', 'rose');
+            };
+        }
+
+        function clearQuarantineZone() {
+            state.quarantine = [];
+            renderQuarantineList();
+            appendLog('Quarantine Purged', 'Isolated row log cleared by user', 'Quarantine Core', 'amber');
+        }
+
+        // Run Autonomous Pipeline Orchestrator Sequence Modal
+        function triggerAutonomousPipelineRun() {
+            openPipelineModal();
+        }
+
+        function executePipelineRunSequence() {
+            const btnStart = document.getElementById('btn-start-pipeline');
+            btnStart.disabled = true;
+            btnStart.classList.add('opacity-50');
+
+            const consoleBox = document.getElementById('pipeline-console');
+            consoleBox.innerHTML = '<p class="text-sky-400">[ORCHESTRATOR]: Initiating 4-Agent Autonomous Pipeline...</p>';
+
+            const updateStep = (stepNum, statusText, colorClass, iconClass) => {
+                const statusEl = document.getElementById(`step-status-${stepNum}`);
+                const iconEl = document.getElementById(`step-icon-${stepNum}`);
+                statusEl.textContent = statusText;
+                statusEl.className = `text-[10px] font-bold px-2 py-0.5 rounded ${colorClass}`;
+                if (iconClass) iconEl.className = `${iconClass} text-lg`;
+            };
+
+            // Step 1: Ingestion Agent
+            setTimeout(() => {
+                updateStep(1, 'Executing...', 'bg-sky-500/20 text-sky-300', 'ph-fill ph-file-search text-sky-400 ai-thinking');
+                consoleBox.innerHTML += '<p>[AGENT 1]: Normalizing multi-source schemas across 4 streams...</p>';
+            }, 500);
+
+            // Step 2: Recon Agent
+            setTimeout(() => {
+                updateStep(1, 'Completed', 'bg-emerald-500/20 text-emerald-300', 'ph-fill ph-check-circle text-emerald-400');
+                updateStep(2, 'Executing...', 'bg-sky-500/20 text-sky-300', 'ph-fill ph-arrows-merge text-sky-400 ai-thinking');
+                consoleBox.innerHTML += `<p>[AGENT 2]: Running Fuzzy Match engine with ${state.rules.fuzzyWindow}-day date tolerance...</p>`;
+            }, 1800);
+
+            // Step 3: Tax Compliance Agent
+            setTimeout(() => {
+                updateStep(2, 'Completed', 'bg-emerald-500/20 text-emerald-300', 'ph-fill ph-check-circle text-emerald-400');
+                updateStep(3, 'Executing...', 'bg-sky-500/20 text-sky-300', 'ph-fill ph-scales text-sky-400 ai-thinking');
+                consoleBox.innerHTML += `<p>[AGENT 3]: Verifying DJP e-Faktur DPP & applying PPh 23 (${state.rules.pphRate}%)...</p>`;
+            }, 3200);
+
+            // Step 4: Settlement Agent
+            setTimeout(() => {
+                updateStep(3, 'Completed', 'bg-emerald-500/20 text-emerald-300', 'ph-fill ph-check-circle text-emerald-400');
+                updateStep(4, 'Executing...', 'bg-sky-500/20 text-sky-300', 'ph-fill ph-check-square-offset text-sky-400 ai-thinking');
+                consoleBox.innerHTML += '<p>[AGENT 4]: Generating proposed adjustment entries & locking state...</p>';
+            }, 4500);
+
+            // Completion
+            setTimeout(() => {
+                updateStep(4, 'Completed', 'bg-emerald-500/20 text-emerald-300', 'ph-fill ph-check-circle text-emerald-400');
+                consoleBox.innerHTML += '<p class="text-emerald-400 font-bold">[SUCCESS]: Pipeline execution finished. Audit matrix fully synchronized.</p>';
+                btnStart.disabled = false;
+                btnStart.classList.remove('opacity-50');
+                appendLog('Pipeline Executed', 'All 4 agents completed diagnostic cycle', 'Orchestrator Core', 'emerald');
+            }, 5800);
+        }
+
+        // Rule Config Parameters Adjustments
+        function updateRuleParam(type, val) {
+            if (type === 'fuzzy') {
+                document.getElementById('val-fuzzy-window').textContent = `${val} Days`;
+                state.rules.fuzzyWindow = parseInt(val);
+            } else if (type === 'pph') {
+                document.getElementById('val-pph-rate').textContent = `${val}%`;
+                state.rules.pphRate = parseFloat(val);
+            } else if (type === 'ppn') {
+                document.getElementById('val-ppn-threshold').textContent = `Rp ${parseInt(val).toLocaleString()}`;
+                state.rules.ppnThreshold = parseInt(val);
+            }
+        }
+
+        function applyRuleParametersAndReevaluate() {
+            closeTechCoreModal();
+            appendLog('Agent Rules Re-evaluated', `Window: ${state.rules.fuzzyWindow}d | PPh: ${state.rules.pphRate}%`, 'Rule Engine', 'sky');
+            updateMetricsUI();
+        }
+
+        function resetRulesToDefault() {
+            state.rules.fuzzyWindow = 7;
+            state.rules.pphRate = 2.0;
+            state.rules.ppnThreshold = 500000;
+            document.getElementById('input-fuzzy-window').value = 7;
+            document.getElementById('input-pph-rate').value = 2;
+            document.getElementById('input-ppn-threshold').value = 500000;
+            updateRuleParam('fuzzy', 7);
+            updateRuleParam('pph', 2);
+            updateRuleParam('ppn', 500000);
+        }
+
+        // Chart.js Dynamics
+        function initChart() {
+            const ctx = document.getElementById('reconChart').getContext('2d');
+            state.reconChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Perfect Match (GL vs Bank vs Tax)', 'Within Tolerance', 'Tax Risk Exposure', 'Unmatched Discrepancy'],
+                    datasets: [{
+                        data: [78, 14, 5, 3],
+                        backgroundColor: ['#10b981', '#0ea5e9', '#f59e0b', '#f43f5e'],
+                        borderWidth: 0,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 16,
+                                font: { family: "'Inter', sans-serif", size: 12 },
+                                color: '#475569'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChartData() {
+            if (!state.reconChartInstance) return;
+            const remaining = state.findings.length;
+            if (remaining === 0) {
+                state.reconChartInstance.data.datasets[0].data = [100, 0, 0, 0];
+            } else {
+                state.reconChartInstance.data.datasets[0].data = [80 - (remaining * 2), 12, remaining * 3, remaining * 2];
+            }
+            state.reconChartInstance.update();
+        }
+
+        // Modals Toggles
+        function openTechCoreModal() {
+            openModal('tech-core-modal', 'tech-modal-box');
+        }
+        function closeTechCoreModal() {
+            closeModal('tech-core-modal', 'tech-modal-box');
+        }
+        function openResetModal() {
+            openModal('reset-modal', 'reset-modal-box');
+        }
+        function closeResetModal() {
+            closeModal('reset-modal', 'reset-modal-box');
+        }
+        function openPipelineModal() {
+            openModal('pipeline-modal', 'pipeline-modal-box');
+        }
+        function closePipelineModal() {
+            closeModal('pipeline-modal', 'pipeline-modal-box');
+        }
+
+        function openModal(modalId, boxId) {
+            const modal = document.getElementById(modalId);
+            const overlay = document.getElementById('overlay');
+            const box = document.getElementById(boxId);
+
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                box.classList.remove('scale-95', 'opacity-0');
+                box.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal(modalId, boxId) {
+            const modal = document.getElementById(modalId);
+            const box = document.getElementById(boxId);
+            box.classList.remove('scale-100', 'opacity-100');
+            box.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function openIntegrationModal(type) {
+            const modal = document.getElementById('integration-modal');
+            const overlay = document.getElementById('overlay');
+            const contentBox = document.getElementById('modal-content-box');
+            const titleEl = document.getElementById('modal-title');
+            const subtitleEl = document.getElementById('modal-subtitle');
+            const iconContainer = document.getElementById('modal-icon-container');
+            const bodyEl = document.getElementById('modal-body');
+
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                contentBox.classList.remove('scale-95', 'opacity-0');
+                contentBox.classList.add('scale-100', 'opacity-100');
+            }, 10);
+
+            if (type === 'gdrive') {
+                titleEl.textContent = 'Google Drive Integration';
+                subtitleEl.textContent = 'Method 2: Shared Drive Auto-Sync';
+                iconContainer.className = 'w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl';
+                iconContainer.innerHTML = '<i class="ph-fill ph-google-logo"></i>';
+                bodyEl.innerHTML = `
+                    <p class="text-xs text-slate-600">Enter a Google Drive folder link containing client General Ledger or bank exports.</p>
+                    <input type="text" id="gdrive-url" placeholder="https://drive.google.com/drive/folders/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-sky-500 focus:bg-white transition-all">
+                    <button onclick="simulateIntegrationIngest('Google Drive Sync', 'gdrive-url')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs transition-colors shadow-sm">
+                        Sync Drive Stream
+                    </button>
+                `;
+            } else if (type === 'gmail') {
+                titleEl.textContent = 'Gmail Extractor Agent';
+                subtitleEl.textContent = 'Method 3: Inbox e-Faktur Pull';
+                iconContainer.className = 'w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center text-xl';
+                iconContainer.innerHTML = '<i class="ph-fill ph-envelope-simple"></i>';
+                bodyEl.innerHTML = `
+                    <p class="text-xs text-slate-600">Enter sender filter or query to pull tax e-Faktur PDFs automatically.</p>
+                    <input type="text" id="gmail-query" placeholder="ebilling@pajak.go.id or label:Invoices" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-sky-500 focus:bg-white transition-all">
+                    <button onclick="simulateIntegrationIngest('Gmail Extractor', 'gmail-query')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs transition-colors shadow-sm">
+                        Connect Gmail Extractor
+                    </button>
+                `;
+            } else if (type === 'url') {
+                titleEl.textContent = 'Direct API Endpoint';
+                subtitleEl.textContent = 'Method 4: Real-time Cloud Stream';
+                iconContainer.className = 'w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl';
+                iconContainer.innerHTML = '<i class="ph-fill ph-globe"></i>';
+                bodyEl.innerHTML = `
+                    <p class="text-xs text-slate-600">Provide AWS S3, Azure Blob, or ERP Webhook URL.</p>
+                    <input type="text" id="api-url" placeholder="https://s3.amazonaws.com/audit-bucket/q3.json" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-sky-500 focus:bg-white transition-all">
+                    <button onclick="simulateIntegrationIngest('Cloud API Endpoint', 'api-url')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs transition-colors shadow-sm">
+                        Connect Endpoint Stream
+                    </button>
+                `;
+            }
+        }
+
+        function closeIntegrationModal() {
+            closeModal('integration-modal', 'modal-content-box');
+        }
+
+        function simulateIntegrationIngest(sourceName, inputId) {
+            const inputVal = document.getElementById(inputId).value || 'Connected Endpoint';
+            closeIntegrationModal();
+
+            const newSource = {
+                id: `source-${Date.now()}`,
+                name: `${sourceName} Stream`,
+                method: sourceName,
+                type: 'External Connection',
+                size: 'Live Sync',
+                rows: 2450,
+                hash: 'LIVE-STREAM',
+                status: 'Parsed'
+            };
+
+            state.sources.unshift(newSource);
+            renderSourcesList();
+            updateMetricsUI();
+            appendLog(`Source Connected: ${sourceName}`, `Target: ${inputVal.substring(0, 30)}...`, 'Integration Engine', 'emerald');
+        }
+
+        function openInspectModal(refCode) {
+            const modal = document.getElementById('inspect-modal');
+            const overlay = document.getElementById('overlay');
+            const box = document.getElementById('inspect-modal-box');
+            const titleEl = document.getElementById('inspect-title');
+            const bodyEl = document.getElementById('inspect-body');
+
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                box.classList.remove('scale-95', 'opacity-0');
+                box.classList.add('scale-100', 'opacity-100');
+            }, 10);
+
+            titleEl.textContent = `Raw Audit Coordinate Inspection: ${refCode}`;
+
+            const finding = state.findings.find(f => f.ref === refCode);
+            if (finding) {
+                bodyEl.innerHTML = `
+                    <div class="bg-slate-900 text-emerald-400 p-4 rounded-xl font-mono text-[11px] space-y-2">
+                        <p class="text-slate-400">// RAW TRACEABILITY MATRIX: ${refCode}</p>
+                        <p>[Source 1 Coordinate]: ${finding.sourceTrace.s1}</p>
+                        <p>[Source 2 Coordinate]: ${finding.sourceTrace.s2}</p>
+                        <p>[Tax Registry Sync]: ${finding.sourceTrace.tax}</p>
+                        <p>[Exposure Value]: Rp ${finding.exposureValue.toLocaleString()}</p>
+                        <p>[Rule Window]: ${state.rules.fuzzyWindow} days tolerance | PPh Standard Rate: ${state.rules.pphRate}%</p>
+                    </div>
+                `;
+            } else {
+                bodyEl.innerHTML = `<p class="text-xs text-slate-500">No active details found for reference ${refCode}.</p>`;
+            }
+        }
+
+        function closeInspectModal() {
+            closeModal('inspect-modal', 'inspect-modal-box');
+        }
+
+        function closeAllPanels() {
+            document.getElementById('ask-ali-panel').classList.add('translate-x-full');
+            closeIntegrationModal();
+            closeInspectModal();
+            closeResetModal();
+            closeTechCoreModal();
+            closePipelineModal();
+
+            const overlay = document.getElementById('overlay');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+        }
+
+        // Ask ALI AI Chat Logic
+        function toggleAskAli() {
+            const panel = document.getElementById('ask-ali-panel');
+            const overlay = document.getElementById('overlay');
+            
+            if (panel.classList.contains('translate-x-full')) {
+                panel.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                closeAllPanels();
+            }
+        }
+
+        function sendQuickPrompt(txt) {
+            document.getElementById('chat-input').value = txt;
+            sendChatMessage();
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const chatContainer = document.getElementById('chat-messages');
+
+            const userMsg = document.createElement('div');
+            userMsg.className = 'flex items-start justify-end space-x-2';
+            userMsg.innerHTML = `
+                <div class="bg-sky-600 text-white p-3 rounded-2xl rounded-tr-none shadow-sm text-xs leading-relaxed max-w-[80%]">
+                    ${text}
+                </div>
+            `;
+            chatContainer.appendChild(userMsg);
+            input.value = '';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            setTimeout(() => {
+                let aiReply = "Berdasarkan PMK No. 141/PMK.03/2015 dan transaksi aktif, ALI telah mengonfirmasi bahwa seluruh pemindahan dana jasa wajib dipotong PPh 23 (2%).";
+                if (text.toLowerCase().includes('pph 23') || text.toLowerCase().includes('bca')) {
+                    aiReply = "Untuk transaksi BCA #142 (Rp 184.000.000), vendor PT Mitra Tekno Utama belum menerbitkan Bukti Potong PPh 23. Rekomendasi ALI: Buat jurnal accrued tax Rp 3.680.000 (2%).";
+                } else if (text.toLowerCase().includes('ppn') || text.toLowerCase().includes('selisih')) {
+                    aiReply = "Terjadi perbedaan DPP PPN Masukan sebesar Rp 15M antara GL dan e-Faktur DJP. Hal ini menyebabkan risiko over-claim PPN sebesar Rp 1.650.000.";
+                }
+
+                const aliMsg = document.createElement('div');
+                aliMsg.className = 'flex items-start space-x-3';
+                aliMsg.innerHTML = `
+                    <div class="w-7 h-7 rounded-full bg-sky-100 flex items-center justify-center text-sky-600 shrink-0 mt-0.5">
+                        <i class="ph-fill ph-robot"></i>
+                    </div>
+                    <div class="bg-slate-100 p-3.5 rounded-2xl rounded-tl-none shadow-sm text-slate-800 leading-relaxed text-xs">
+                        ${aiReply}
+                    </div>
+                `;
+                chatContainer.appendChild(aliMsg);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 700);
+        }
+
+        function scrollToDropzone() {
+            document.getElementById('file-dropzone').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
